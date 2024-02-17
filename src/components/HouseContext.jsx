@@ -39,6 +39,74 @@ const HouseContextProvider = ({ children }) => {
     setProperties(uniqueProperties);
   }, []);
 
+  const handleClick = () => {
+    setLoading(true);
+    // create a function that check if the string includes '(any)'
+    const isDefault = (str) => {
+      return str.split(" ").includes("(any)");
+    };
+
+    const minPrice = parseInt(price.split(" ")[0]);
+    const maxPrice = parseInt(price.split(" ")[2]);
+
+    const newHouses = housesData.filter((house) => {
+      const housePrice = parseInt(house.price);
+
+      // if all values are selected
+      if (
+        house.country === country &&
+        house.type === property &&
+        housePrice >= minPrice &&
+        housePrice <= maxPrice
+      ) {
+        return house;
+      }
+
+      // if all values is default
+      if (isDefault(country) && isDefault(property) && isDefault(price)) {
+        return house;
+      }
+
+      // if country not default
+      if (!isDefault(country) && isDefault(property) && isDefault(price)) {
+        return house.country === country;
+      }
+
+      if (isDefault(country) && !isDefault(property) && isDefault(price)) {
+        return house.type === property;
+      }
+
+      if (isDefault(country) && isDefault(property) && !isDefault(price)) {
+        if (house.price >= minPrice && house.price <= maxPrice) {
+          return house;
+        }
+      }
+
+      if (!isDefault(country) && !isDefault(property) && isDefault(price)) {
+        return house.country === country && house.type === property;
+      }
+
+      if (!isDefault(country) && isDefault(property) && !isDefault(price)) {
+        if (house.price >= minPrice && house.price <= maxPrice) {
+          return house.country === country;
+        }
+      }
+
+      if (isDefault(country) && !isDefault(property) && !isDefault(price)) {
+        if (house.price >= minPrice && house.price <= maxPrice) {
+          return house.type === property;
+        }
+      }
+    });
+
+    setTimeout(() => {
+      return (
+        newHouses.length < 1 ? setHouses([]) : setHouses(newHouses),
+        setLoading(false)
+      );
+    }, 1000);
+  };
+
   return (
     <HouseContext.Provider
       value={{
@@ -55,6 +123,7 @@ const HouseContextProvider = ({ children }) => {
         houses,
         loading,
         setLoading,
+        handleClick,
       }}
     >
       {children}
